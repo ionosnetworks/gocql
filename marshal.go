@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 
 	"gopkg.in/inf.v0"
 )
@@ -952,6 +953,13 @@ func marshalFloat(info TypeInfo, value interface{}) ([]byte, error) {
 }
 
 func unmarshalFloat(info TypeInfo, data []byte, value interface{}) error {
+	if len(data) != 4 {
+		rv := reflect.ValueOf(value)
+		if rv.Kind() == reflect.Ptr {
+			rv.SetPointer(unsafe.Pointer(0))
+			return nil
+		}
+	}
 	switch v := value.(type) {
 	case Unmarshaler:
 		return v.UnmarshalCQL(info, data)
